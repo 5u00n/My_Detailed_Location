@@ -121,7 +121,7 @@ public class WifiScanReceiver extends BroadcastReceiver {
 
                 for(DataSnapshot ds : dataSnapshot.getChildren()) {
                     WifiDistanceData wf=  ds.getValue(WifiDistanceData.class);
-                    Log.d(" Key Data : [ "+ds.getKey()+" ]", String.valueOf(wf.getDistance()));
+                    Log.d(" Key Data : [ "+ds.getKey()+" ", String.valueOf(wf.getDistance()));
                 }
 
 
