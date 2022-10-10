@@ -27,6 +27,7 @@ import android.widget.Toast;
 import com.google.android.gms.location.LocationServices;
 import com.su00n.mydetailedlocation.Location.Constraints;
 import com.su00n.mydetailedlocation.Location.LocationService;
+import com.su00n.mydetailedlocation.ViewData.GatheredDataActivity;
 
 import java.util.List;
 
@@ -46,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-        startL= findViewById(R.id.location_start);
+        startL= findViewById(R.id.check_data);
         stopL= findViewById(R.id.location_stop);
         wifiList = findViewById(R.id.wifiList);
         buttonScan = findViewById(R.id.scanBtn);
@@ -64,9 +65,10 @@ public class MainActivity extends AppCompatActivity {
         buttonScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(
                             MainActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, MY_PERMISSIONS_ACCESS_COARSE_LOCATION);
+                    ActivityCompat.requestPermissions(MainActivity.this,new String[] {Manifest.permission.ACCESS_FINE_LOCATION},REQUEST_CODE_LOCATION_PERMISSION);
                 } else {
                     startLocationService();
                     wifiManager.startScan();
@@ -78,13 +80,8 @@ public class MainActivity extends AppCompatActivity {
         startL.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED){
-                    ActivityCompat.requestPermissions(MainActivity.this,new String[] {Manifest.permission.ACCESS_FINE_LOCATION},REQUEST_CODE_LOCATION_PERMISSION);
-
-                }
-                else{
-                    startLocationService();
-                }
+               Intent i = new Intent(MainActivity.this, GatheredDataActivity.class);
+               startActivity(i);
 
             }
         });

@@ -2,6 +2,9 @@ package com.su00n.mydetailedlocation;
 
 import static android.content.ContentValues.TAG;
 
+import static com.su00n.mydetailedlocation.Helpers.LocationCalculation.calculateDistance;
+import static com.su00n.mydetailedlocation.Helpers.LocationCalculation.locDistance;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -16,6 +19,7 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import com.google.firebase.database.DataSnapshot;
@@ -55,25 +59,36 @@ public class WifiScanReceiver extends BroadcastReceiver {
     int i = 0;
 
 
-
-
     DateFormat df = new SimpleDateFormat("EEE, d MMM yyyy, HH:mm:ss.SSS");
     String date;
     WifiDistanceData wfd;
+    private ArrayList<WifiDistanceData> group = new ArrayList<>();
+    DatabaseReference membersRef;
+
+    public void setGroup(ArrayList<WifiDistanceData> group) {
+        this.group = group;
+    }
+
+    public ArrayList<WifiDistanceData> getGroup() {
+        return this.group;
+    }
+
+    public void emptyGroup() {
+        this.group.clear();
+    }
 
     public WifiScanReceiver(WifiManager wifiManager, ListView wifiDeviceList) {
         this.wifiManager = wifiManager;
         this.wifiDeviceList = wifiDeviceList;
         database = FirebaseDatabase.getInstance();
         //this.act = activity;
-
-        wfd = new WifiDistanceData();
+        // wfd = new WifiDistanceData();
 
 
     }
 
     public void onReceive(Context context, Intent intent) {
-        i++;
+
         dbRef = database.getReference("test_wifi_data");
 
         double lat, lon, altitu;
@@ -83,6 +98,8 @@ public class WifiScanReceiver extends BroadcastReceiver {
             List<ScanResult> wifiList = wifiManager.getScanResults();
             ArrayList<String> deviceList = new ArrayList<>();
             double distance = 0.0;
+
+            //Looping for the
             for (ScanResult scanResult : wifiList) {
 
                 sb.append("\n").append(scanResult.SSID).append(" - ").append(scanResult.capabilities);
@@ -90,10 +107,12 @@ public class WifiScanReceiver extends BroadcastReceiver {
                 lat = LocationService.latitude;
                 lon = LocationService.longitude;
                 altitu = LocationService.altitude;
-
                 deviceList.add("SSID :-   " + scanResult.SSID + "\nDistance :-   " + distance + " meter");
-                Log.d(df.format(Calendar.getInstance().getTime())+" - WIFI WITH LOCATION",i+"  SSID : "+scanResult.SSID+"  Location: "+ LocationService.longitude+" :: "+LocationService.latitude);
-                dbRef.child(scanResult.BSSID).setValue(new WifiLocationColectionModel(scanResult.SSID, scanResult.BSSID, 0, 0, 0, getLocationPointsData(scanResult.BSSID, new WifiDistanceData(lat, lon, altitu, distance))));
+                 dbRef.child(scanResult.BSSID).child("actual").setValue(new WifiLocationColectionModel(scanResult.SSID, scanResult.BSSID, 0, 0, 0));
+                if (lat != 0 || lon != 0) {
+                    dbRef.child(scanResult.BSSID).child("wfd").child(String.valueOf(i)).setValue(new WifiDistanceData(lat, lon, altitu, distance));
+                    i++;
+                }
 
             }
             ArrayAdapter arrayAdapter = new ArrayAdapter(context, android.R.layout.simple_list_item_1, deviceList.toArray());
@@ -102,40 +121,6 @@ public class WifiScanReceiver extends BroadcastReceiver {
     }
 
 
-    public double calculateDistance(double signalLevelInDb, double freqInMHz) {
-        double exp = (27.55 - (20 * Math.log10(freqInMHz)) + Math.abs(signalLevelInDb)) / 20.0;
-        return Math.pow(10.0, exp);
-    }
 
-    private ArrayList<WifiDistanceData> getLocationPointsData(String BSSID, WifiDistanceData wfd) {
-
-        ArrayList<WifiDistanceData> wifiDistanceData = new ArrayList<>();
-        wifiDistanceData.add(wfd);
-
-
-        DatabaseReference membersRef = dbRef.child(BSSID).child("wfd");
-
-        membersRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for(DataSnapshot ds : dataSnapshot.getChildren()) {
-                    WifiDistanceData wf=  ds.getValue(WifiDistanceData.class);
-                    Log.d(" Key Data : [ "+ds.getKey()+" ", String.valueOf(wf.getDistance()));
-                }
-
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                Log.w(TAG, "Failed to read value.", error.toException());
-            }
-        });
-        if (!wifiDistanceData.isEmpty())
-            Log.d("WIFI LIST@@@@@@@@@@", String.valueOf(wifiDistanceData.get(0).getLatitude()));
-
-        return wifiDistanceData;
-    }
 }
 

@@ -8,19 +8,19 @@ import java.util.List;
 public class WifiLocationColectionModel {
     private String wifi_name, wifi_mac_addr;
     private double wifi_latitude, wifi_longitude,wifi_altitude;
-    private ArrayList<WifiDistanceData> wfd= new ArrayList<>();
+   // private ArrayList<WifiDistanceData> wfd= new ArrayList<>();
 
     public WifiLocationColectionModel(Object obj){
 
     }
 
-    public WifiLocationColectionModel(String wifi_name, String wifi_mac_addr, double wifi_latitude, double wifi_longitude, double wifi_altitude, ArrayList<WifiDistanceData> wfd) {
+    public WifiLocationColectionModel(String wifi_name, String wifi_mac_addr, double wifi_latitude, double wifi_longitude, double wifi_altitude) {
         this.wifi_name = wifi_name;
         this.wifi_mac_addr = wifi_mac_addr;
         this.wifi_latitude = wifi_latitude;
         this.wifi_longitude = wifi_longitude;
         this.wifi_altitude = wifi_altitude;
-        this.wfd = wfd;
+
     }
 
     public String getWifi_name() {
@@ -63,11 +63,4 @@ public class WifiLocationColectionModel {
         this.wifi_altitude = wifi_altitude;
     }
 
-    public ArrayList<WifiDistanceData> getWfd() {
-        return wfd;
-    }
-
-    public void setWfd(ArrayList<WifiDistanceData> wfd) {
-        this.wfd = wfd;
-    }
 }
